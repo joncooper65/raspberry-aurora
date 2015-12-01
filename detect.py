@@ -1,4 +1,8 @@
 #thanks to http://www.pyimagesearch.com/2014/08/04/opencv-python-color-detection/
+#sudo apt-get install python-numpy
+#sudo apt-get install libopencv-dev python-opencv
+#wavelength of atomic oxygen emissions in aurora is 558nm, which is rgb189,255,0 (or #bdff00)
+#test aurora image has rgb177,166,13
 
 # import the necessary packages
 import numpy as np
@@ -16,9 +20,8 @@ image = cv2.imread(args["image"])
 # define the list of boundaries
 boundaries = [
 	([17, 15, 100], [50, 56, 200]),
-	([86, 31, 4], [220, 88, 50]),
-	([25, 146, 190], [62, 174, 250]),
-	([103, 86, 65], [145, 133, 128])
+	([17, 15, 100], [50, 56, 200]),
+	([170, 160, 0], [180, 170, 20])
 ]
 
 # loop over the boundaries

@@ -17,11 +17,10 @@ args = vars(ap.parse_args())
 # load the image
 image = cv2.imread(args["image"])
 
-# define the list of boundaries
+# define the list of boundaries - BGR (NOT RGB!!!)
 boundaries = [
-	([17, 15, 100], [50, 56, 200]),
-	([17, 15, 100], [50, 56, 200]),
-	([170, 160, 0], [180, 170, 20])
+	([0,180,0], [255,255,255]),
+	([0,150,0], [200,255,200])
 ]
 
 # loop over the boundaries

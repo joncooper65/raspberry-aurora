@@ -6,36 +6,50 @@
 
 # import the necessary packages
 import numpy as np
-import argparse
+#import argparse
 import cv2
 
 # construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", help = "path to the image")
-args = vars(ap.parse_args())
+#ap = argparse.ArgumentParser()
+#ap.add_argument("-i", "--image", help = "path to the image")
+#args = vars(ap.parse_args())
  
 # load the image
-image = cv2.imread(args["image"])
+imagenames = ["test0","test1","test2","test3","test4","test5","testnone1","testnone2","testnone3"]
+for (imagename) in imagenames:
+	image = cv2.imread(imagename + ".jpg")
 
-# define the list of boundaries - BGR (NOT RGB!!!)
-boundaries = [
-	([0,180,0], [255,255,255]),
-	([0,150,0], [200,255,200])
-]
+	#Split into rgb channels for easier manipulation (until I sussout the matrix functions more!)	
+	b,g,r = cv2.split(image)
 
-# loop over the boundaries
-for (lower, upper) in boundaries:
-	# create NumPy arrays from the boundaries
-	lower = np.array(lower, dtype = "uint8")
-	upper = np.array(upper, dtype = "uint8")
- 
-	# find the colors within the specified boundaries and apply
-	# the mask
-	mask = cv2.inRange(image, lower, upper)
-	output = cv2.bitwise_and(image, image, mask = mask)
- 
-	# show the images
+	#Create a mask for pixels that are green dominant
+        #ADJUST THIS SO THAT IT IS MORE THAN JUST SLIGHTLY GREEN DOMINANT, BUT IS DEFINATELY A GOOD BIT HIGHER THAN THE OTHERS
+	mask1 = cv2.compare(g,b,cv2.CMP_GT)
+	mask2 = cv2.compare(g,r,cv2.CMP_GT)
+	maskgreendominant = cv2.bitwise_and(mask1, mask2)
+
+	#Create a mask where green and one other colour only are almost 1:1
+	#green:blue        
+	gbratio = cv2.divide(g,b)
+        maskgbratio = cv2.inRange(gbratio,0.9,1.1)
+        #green:red
+        grratio = cv2.divide(g,r)
+        maskgrratio = cv2.inRange(grratio,0.9,1.1)
+	#only g/r or g/b should be near 1, if both then it is whitish, which we don't want
+	maskgreenish = cv2.bitwise_xor(maskgrratio,maskgbratio)
+
+	#Combine green dominant and greenish masks
+	colourmask = cv2.bitwise_or(maskgreendominant, maskgreenish)
+	
+	#Create a mask that sets an intensity threshold
+	total = cv2.add(cv2.add(r,g),b)
+	intensitymask = cv2.inRange(total,150,765)
+	
+	#Combine colour and intensity masks
+	finalmask = cv2.bitwise_and(colourmask, intensitymask)
+
+	output = cv2.bitwise_and(image, image, mask = finalmask)
 	cv2.imshow("images", np.hstack([image, output]))
 	cv2.waitKey(0)
-	
-	
+
+
